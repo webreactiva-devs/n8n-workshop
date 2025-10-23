@@ -63,16 +63,64 @@ https://www.youtube.com/watch?v=wRuSTFeTd2M
 
 https://www.youtube.com/watch?v=3ZFQLSLmOg8
 
+## Workflows para copiar y pegar
 
-## Checlist durante la sesión
+### Agente de IA sencillo
 
-Cosas que hay que ver durante la sesión https://github.com/webreactiva-devs/n8n-workshop/issues/1
+https://github.com/webreactiva-devs/n8n-workshop/blob/main/workflows/Ejemplo%20AI%20Agent%20(Groq).json
+
+¿Qué credenciales necesitas para que funcione?
+- Cuenta gratutida de Groq para tener modelos de IA
+
+
+### Email dirairo de los repos trending de Github
+
+https://github.com/webreactiva-devs/n8n-workshop/blob/main/workflows/GitHub%20Trending%20Top%205%20-%20PROD%20(1-1).json
+
+¿Qué credenciales necesitas para que funcione?
+- Cuenta gratutida de Groq para tener modelos de IA
+
+### Bot de Telegram que transcribe notas de voz para guardar o recuperarls de una base de datos
+
+https://github.com/webreactiva-devs/n8n-workshop/blob/main/workflows/Telegram%20Audio%20Notes%20PROD.json
+
+¿Qué necesitas para qué funcione?
+- Cuenta en OpenAI Platformrm para la transcripción
+- Cuenta de Groq para modelos de IA gratuita
+- Un bot de telegram (el token)
+- Acceso a una base de datos de Notion con [esta estructura](https://www.notion.so/29514d1a96d181fc8529e22d3126f870?v=29514d1a96d181989117000ce7f74218&source=copy_link)
+
+### RAG para consultar una página sin buscador
+
+https://github.com/webreactiva-devs/n8n-workshop/blob/main/workflows/Sabelotodo%20Claude%20Code%20Awesome%20PROD.json
+
+¿Qué credenciales necesitas para que funcione?
+- Cuenta en OpenAI Platform para tener acceso a los embeddings
+- Cuenta gratutida de Groq para tener modelos de IA
+
+## Recursos
+
+- https://n8n.io/workflows/
+- https://agents.sabrina.dev/
+- https://github.com/Zie619/n8n-workflows
+- https://www.n8n-mcp.com/
+
+
+## Checklist durante la sesión
+
+- [x]  Copiar y pegar JSON
+- [x]  Importar plantillas
+- [x]  Crear credenciales
+- [x]  Pinear datos
+- [x]  Ejecución de pasos concretos
+- [x]  Trigger Chat
+- [x]  Trigger Form
+- [x]  Tiempo de ejecución (flechas moviéndose)
+- [x]  Ejecuciones pasadas
  
-## Más cosas...
-
-> Las veremos en el taller, atento a los cambios de este repositorio ;)
 
 
 
 
-| Hecho con 🧡 para la Comunidad Malandriner
+
+> Hecho con 🧡 para la Comunidad Malandriner
