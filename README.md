@@ -60,6 +60,21 @@ https://www.youtube.com/watch?v=wRuSTFeTd2M
 
 https://www.youtube.com/watch?v=3ZFQLSLmOg8
 
+
+## Checlist durante la sesión
+
+Cosas que hay que ver durante la sesión
+
+- [ ]  Copiar y pegar JSON
+- [ ]  Importar plantillas
+- [ ]  Crear credenciales
+- [ ]  Pinear datos
+- [ ]  Ejecución de pasos concretos
+- [ ]  Trigger Chat
+- [ ]  Trigger Form
+- [ ]  Tiempo de ejecución (flechas moviéndose)
+- [ ]  Ejecuciones pasadas
+
 ## Más cosas...
 
 > Las veremos en el taller, atento a los cambios de este repositorio ;)
