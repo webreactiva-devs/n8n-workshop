@@ -63,18 +63,8 @@ https://www.youtube.com/watch?v=3ZFQLSLmOg8
 
 ## Checlist durante la sesión
 
-Cosas que hay que ver durante la sesión
-
-- [ ]  Copiar y pegar JSON
-- [ ]  Importar plantillas
-- [ ]  Crear credenciales
-- [ ]  Pinear datos
-- [ ]  Ejecución de pasos concretos
-- [ ]  Trigger Chat
-- [ ]  Trigger Form
-- [ ]  Tiempo de ejecución (flechas moviéndose)
-- [ ]  Ejecuciones pasadas
-
+Cosas que hay que ver durante la sesión https://github.com/webreactiva-devs/n8n-workshop/issues/1
+ 
 ## Más cosas...
 
 > Las veremos en el taller, atento a los cambios de este repositorio ;)
