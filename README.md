@@ -1,6 +1,9 @@
 # Taller de n8n: automatiza tu vida en pocos clics
 
-| Web Reactiva Premium - Con 🧡 para la Comunidad Malandriner
+> Web Reactiva Premium - Con 🧡 para la Comunidad Malandriner
+
+<img width="2095" height="900" alt="image" src="https://github.com/user-attachments/assets/44b70b9e-a243-4e38-939c-8aa3ad2d0470" />
+
 
 ## Instalación de n8n
 
