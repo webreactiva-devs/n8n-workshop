@@ -1,0 +1,218 @@
+{
+  "name": "Context7 Documentation Search Agent PROD",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {}
+      },
+      "id": "0189f85e-2a91-4566-a6c0-5f45e1ab4dd0",
+      "name": "Chat Trigger",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        144
+      ],
+      "webhookId": "1f8c740c-539a-428b-8c24-85104ea55ea8"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a highly specialized documentation search assistant powered by Context7.\n\nYour role:\n1. Understand the user's technical requirements for libraries, frameworks, or tools\n2. Use the Context7 MCP tools to search through comprehensive documentation\n3. Identify the best-matching libraries based on:\n   - Functionality match\n   - Popularity and maintenance status\n   - Ease of integration\n   - Documentation quality\n4. Provide clear, actionable recommendations\n\nWhen responding:\n- Start by acknowledging what the user is looking for\n- Use the MCP tools to search Context7's documentation database\n- Present 2-4 top recommendations with:\n  * Library name and brief description\n  * Key features that match their needs\n  * Installation/getting started info when available\n  * Links to documentation\n- If the search yields no results, suggest alternative search terms or related technologies\n- Responde forma pícara\n\nExample response format:\n\"Based on your need for [X], I found these excellent options:\n\n**1. [Library Name]**\n- [Key features]\n- [Why it fits their needs]\n- [Link if available]\n\n**2. [Library Name]**\n...\n\nWould you like more details about any of these, or shall I search for something else?\"\n\nAlways use the Context7 tools to get current, accurate information. Never make up library details.\n\nIMORTANTE: Responde siempre en español",
+          "maxIterations": 10
+        }
+      },
+      "id": "0189f85e-2a91-4566-a6c0-5f45e1ab4dd1",
+      "name": "Documentation Search Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        528,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "id": "0189f85e-2a91-4566-a6c0-5f45e1ab4dd2",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        464,
+        368
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "dhrZoBBZw3mymyL2",
+          "name": "Groq account 1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.context7.com/mcp",
+        "options": {}
+      },
+      "id": "0189f85e-2a91-4566-a6c0-5f45e1ab4dd3",
+      "name": "Context7 MCP Client",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        720,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "0189f85e-2a91-4566-a6c0-5f45e1ab4dd4",
+      "name": "Conversation Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Context7 Documentation Search Agent\n\n**Purpose:** Connect users to the right libraries via Context7's documentation database\n\n**Features:**\n✅ Natural language queries\n✅ Multi-library recommendations\n✅ Direct documentation links\n✅ Conversation memory",
+        "width": 400,
+        "color": 4
+      },
+      "id": "0189f85e-2a91-4566-a6c0-5f45e1ab4dd5",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        96,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Setup Required:\n\n1. **Groq API Key**: Configure in Groq Chat Model node\n2. **Context7 MCP**: Already configured at https://mcp.context7.com/mcp\n3. **Activate Workflow**: Turn on to enable the chat\n4. **Test**: Use the chat interface to search for libraries",
+        "height": 348,
+        "width": 340,
+        "color": 6
+      },
+      "id": "0189f85e-2a91-4566-a6c0-5f45e1ab4dd6",
+      "name": "Sticky Note 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        976,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "formTitle": "Mola",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        160,
+        464
+      ],
+      "id": "f3e6fe02-8328-41ee-ae22-94efdc0e106d",
+      "name": "On form submission",
+      "webhookId": "97a25a8e-c5eb-43b4-803d-f811bca88abf"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat Trigger": {
+      "main": [
+        [
+          {
+            "node": "Documentation Search Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "main": [],
+      "ai_languageModel": [
+        [
+          {
+            "node": "Documentation Search Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Context7 MCP Client": {
+      "main": [],
+      "ai_tool": [
+        [
+          {
+            "node": "Documentation Search Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation Memory": {
+      "main": [],
+      "ai_memory": [
+        [
+          {
+            "node": "Documentation Search Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Documentation Search Agent": {
+      "main": []
+    },
+    "Sticky Note": {
+      "main": []
+    },
+    "Sticky Note 2": {
+      "main": []
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Documentation Search Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "061e0626-dd33-407a-9573-64f8d4b449a8",
+  "meta": {
+    "instanceId": "f28ec27b08f1f4c023867f34ce4f530a2ceccedef2f74c2ab9582dd9a30c87d0"
+  },
+  "id": "cpTphCeT6BMZiCt8",
+  "tags": []
+}

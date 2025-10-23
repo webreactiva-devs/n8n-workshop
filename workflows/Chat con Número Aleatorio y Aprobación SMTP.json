@@ -1,0 +1,198 @@
+{
+  "name": "Chat con Número Aleatorio y Aprobación SMTP",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "id": "d4b8c6e0-a1f2-4d3e-9b7c-8e5f6a1b2c3d",
+      "name": "When Chat Message Received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        304
+      ],
+      "webhookId": "random-number-chat"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generar número aleatorio entre 0 y 9999\nconst randomNumber = Math.floor(Math.random() * 10000);\n\n// Obtener el mensaje del usuario\nconst userMessage = $input.item.json.chatInput || 'solicitud';\n\n// Retornar el número y contexto\nreturn [{\n  json: {\n    randomNumber: randomNumber,\n    userMessage: userMessage,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "e5c7d8f1-b2g3-5e4f-0c8d-9f6g7h2i3j4k",
+      "name": "Generate Random Number",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "fromEmail": "noreply@tuempresa.com",
+        "toEmail": "admin@tuempresa.com",
+        "subject": "🔢 Aprobación de Número Aleatorio - Solicitud Pendiente",
+        "message": "=<html>\n<body style=\"font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;\">\n  <div style=\"max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);\">\n    <h2 style=\"color: #333; border-bottom: 3px solid #4CAF50; padding-bottom: 10px;\">🎲 Nueva Solicitud de Número Aleatorio</h2>\n    \n    <div style=\"margin: 30px 0; padding: 20px; background-color: #e8f5e9; border-left: 4px solid #4CAF50; border-radius: 5px;\">\n      <h3 style=\"margin: 0 0 10px 0; color: #2e7d32;\">Número Generado:</h3>\n      <p style=\"font-size: 36px; font-weight: bold; color: #1b5e20; margin: 10px 0;\">{{ $json.randomNumber }}</p>\n    </div>\n\n    <div style=\"margin: 20px 0; padding: 15px; background-color: #f5f5f5; border-radius: 5px;\">\n      <p style=\"margin: 5px 0; color: #666;\"><strong>Mensaje del usuario:</strong> {{ $json.userMessage }}</p>\n      <p style=\"margin: 5px 0; color: #666;\"><strong>Fecha/Hora:</strong> {{ $json.timestamp }}</p>\n    </div>\n\n    <div style=\"margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;\">\n      <p style=\"color: #666; font-size: 14px;\">¿Deseas aprobar este número para que sea enviado al usuario?</p>\n      <p style=\"color: #999; font-size: 12px; margin-top: 10px;\">Haz clic en uno de los botones a continuación para responder.</p>\n    </div>\n  </div>\n</body>\n</html>",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": 24
+            }
+          }
+        }
+      },
+      "id": "f6d8e9g2-c3h4-6f5g-1d9e-0g7h8i3j4k5l",
+      "name": "Send Email for Approval",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        688,
+        304
+      ],
+      "webhookId": "324d618b-62cf-425d-b422-a0a30ff2a1a9",
+      "credentials": {
+        "smtp": {
+          "id": "OVqgCwDB1WrDr8uH",
+          "name": "Test Mailtrap"
+        }
+      },
+      "notes": "IMPORTANTE: Configura las credenciales SMTP y reemplaza los emails con tus direcciones reales"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "approval-check-001",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "g7e9f0h3-d4i5-7g6h-2e0f-1h8i9j4k5l6m",
+      "name": "Check Approval",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        912,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "message": "=✅ ¡Número aprobado!\n\nTu número aleatorio es: **{{ $('Generate Random Number').item.json.randomNumber }}**\n\nEste número ha sido validado por el administrador.\n\n💡 Puedes solicitar otro número cuando quieras.",
+        "waitUserReply": false,
+        "options": {}
+      },
+      "id": "h8f0g1i4-e5j6-8h7i-3f1g-2i9j0k5l6m7n",
+      "name": "Respond - Approved",
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "message": "=❌ Solicitud rechazada\n\nEl número **{{ $('Generate Random Number').item.json.randomNumber }}** no fue aprobado por el administrador.\n\n🔄 Por favor, inténtalo de nuevo enviando un nuevo mensaje para generar otro número aleatorio.",
+        "waitUserReply": false,
+        "options": {}
+      },
+      "id": "i9g1h2j5-f6k7-9i8j-4g2h-3j0k1l6m7n8o",
+      "name": "Respond - Rejected",
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        432
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Chat Message Received": {
+      "main": [
+        [
+          {
+            "node": "Generate Random Number",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Random Number": {
+      "main": [
+        [
+          {
+            "node": "Send Email for Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email for Approval": {
+      "main": [
+        [
+          {
+            "node": "Check Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Approval": {
+      "main": [
+        [
+          {
+            "node": "Respond - Approved",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond - Rejected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0838f1df-f567-4abb-bd0e-f00c1915dd88",
+  "meta": {
+    "instanceId": "f28ec27b08f1f4c023867f34ce4f530a2ceccedef2f74c2ab9582dd9a30c87d0"
+  },
+  "id": "UijKLOQEj2RUGaA6",
+  "tags": []
+}

@@ -1,0 +1,1097 @@
+{
+  "name": "Telegram Audio Notes PROD",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "chatIds": "14977870"
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fbfeacb9-61b7-4056-b3ac-ae82662ed75d",
+      "name": "Telegram Trigger",
+      "webhookId": "4bdbece5-ca19-4eae-b3e9-17465e00afac",
+      "credentials": {
+        "telegramApi": {
+          "id": "7hfxjDRCjP7INCH5",
+          "name": "Telegram @audio_notes_n8n_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.voice.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "f5289868-b6d9-474d-a35b-b006615509d0"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "voice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "88bd83c8-792f-49e9-ac81-05d047153c4d",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "b2ce3be6-d391-4a91-a4f8-d6fe3c154445",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        -96
+      ],
+      "id": "10b84cf8-809b-4e7d-864d-a528fb5cb197",
+      "name": "Get a file",
+      "webhookId": "d8a4509e-12b5-4c34-bc1f-de5597679ff3",
+      "credentials": {
+        "telegramApi": {
+          "id": "7hfxjDRCjP7INCH5",
+          "name": "Telegram @audio_notes_n8n_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        672,
+        -96
+      ],
+      "id": "c09206d9-adab-42fd-b9a5-31fa4936a3b2",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "5AMLbwLFOLmaSoXu",
+          "name": "OpenAi n8n demos"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aabbd56c-a107-4ec2-b827-0c1807c52890",
+              "name": "text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        608,
+        80
+      ],
+      "id": "228a5f08-0073-44ba-8055-f9c22de266c3",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}\n",
+        "options": {
+          "systemMessage": "Eres un asistente agéntico capaz de gestionar mis deseos. En base a la petición del usuario decide que tool tiene que utilizar.\n\nLas peticiones que dicen \"Dame\" deberían ser retrieve_database. Si la petición incluye un nivel de urgencia entonces es retrieve_by_level_database. El resto de casos es insert_database\n\n\nTOOLS\n- insert_database\n- retrieve_database\n- retrieve_by_level_database\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1088,
+        0
+      ],
+      "id": "cf8f767e-21a4-4cac-b853-615fb811e608",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        896,
+        224
+      ],
+      "id": "26581c8b-bf60-43a6-b2d0-6af97479b0f1",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "dhrZoBBZw3mymyL2",
+          "name": "Groq account 1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "29114d1a-96d1-8091-9cc5-de1832f18d38",
+          "mode": "list",
+          "cachedResultName": "Audio Notes",
+          "cachedResultUrl": "https://www.notion.so/29114d1a96d180919cc5de1832f18d38"
+        },
+        "title": "={{ $json.output.title }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Title|title",
+              "title": "={{ $json.output.title }}"
+            },
+            {
+              "key": "Note|rich_text",
+              "textContent": "={{ $json.output.note }}"
+            },
+            {
+              "key": "Level|multi_select",
+              "multiSelectValue": "={{ $json.output.level[0] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        432
+      ],
+      "id": "44b727e1-0415-4682-a439-bc3c18fafef9",
+      "name": "Create a database page",
+      "credentials": {
+        "notionApi": {
+          "id": "4zE9OwCAyBLgBqGS",
+          "name": "Notion Audio Notes"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Usa esta tool cuando el usuario quiere añadir un nuevo text",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $workflow.id }}",
+          "mode": "id",
+          "cachedResultUrl": "/workflow/=%7B%7B%20$workflow.id%20%7D%7D"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tool": "insert_database",
+            "chat_id": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+            "query": "={{ $json.text }}"
+          },
+          "matchingColumns": [
+            "tool"
+          ],
+          "schema": [
+            {
+              "id": "tool",
+              "displayName": "tool",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "level",
+              "displayName": "level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1152,
+        224
+      ],
+      "id": "8fc4b90e-0a5c-45d1-bd0c-e3f45467e1b1",
+      "name": "insert_database"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.tool }}",
+                    "rightValue": "insert_database",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "3f6998dc-d640-4db1-9953-84f69c7b19d8"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "insert_database"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cefac32c-a209-472a-bef3-19ae21c99fd7",
+                    "leftValue": "={{ $json.tool }}",
+                    "rightValue": "retrieve_database",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "retrieve_database"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a8a2300d-5aa0-4ba4-8930-19ecd8db4312",
+                    "leftValue": "={{ $json.tool }}",
+                    "rightValue": "retrieve_by_level_database",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "retrieve_by_level_database"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        224,
+        592
+      ],
+      "id": "4e50d2af-308c-4887-a508-4789baaf9e45",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Quiero que a partir de {{ $json.query }} generes un JSON con \n\ntitle: título generado a partir del texto en formato breve y Sentence case\nnote: {{ $json.query }} \nlevel: grado de urgencia: Alto, Medio, Bajo ",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        336
+      ],
+      "id": "74610386-7354-49cb-8996-6d62b76fc62d",
+      "name": "AI Agent Insert"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        464,
+        560
+      ],
+      "id": "2700041c-5079-4d66-8144-775b0d08b689",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "dhrZoBBZw3mymyL2",
+          "name": "Groq account 1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\"title\": \"título generado a partir del texto en formato breve y Sentence case\",\n\"note\": \"el texto original de la transcripcion\",\n\"level\": [\"Alto\", \"Medio\", \"Bajo\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        560
+      ],
+      "id": "64eb857f-9bcb-4fbb-b218-df3beab59d4b",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "tool"
+            },
+            {
+              "name": "query"
+            },
+            {
+              "name": "level"
+            },
+            {
+              "name": "chat_id",
+              "type": "any"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        592
+      ],
+      "id": "d9a88033-6f61-4f41-afb9-78bae8440f38",
+      "name": "When Executed by Another Workflow",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "description": "Usa esta tool cuando el usuario quiere recuperar las notas que están en la base de datos",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $workflow.id }}",
+          "cachedResultName": "={{ $workflow.id }}"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tool": "retrieve_database",
+            "chat_id": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+          },
+          "matchingColumns": [
+            "tool"
+          ],
+          "schema": [
+            {
+              "id": "tool",
+              "displayName": "tool",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "level",
+              "displayName": "level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        224
+      ],
+      "id": "7f9a7e18-6dc2-416b-992b-54e51c4139dd",
+      "name": "retrieve_database"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.chat_id }}",
+        "text": "=Nota almacenada: {{ $json.name }}  {{ $json.url }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1024,
+        432
+      ],
+      "id": "1f64f9ed-0741-41e8-bcc5-bcaa9a6d5ebe",
+      "name": "Send a text message",
+      "webhookId": "4d41251a-fe9f-4d22-a19a-1ac6fbc78fd7",
+      "credentials": {
+        "telegramApi": {
+          "id": "7hfxjDRCjP7INCH5",
+          "name": "Telegram @audio_notes_n8n_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "29114d1a-96d1-8091-9cc5-de1832f18d38",
+          "mode": "list",
+          "cachedResultName": "Audio Notes",
+          "cachedResultUrl": "https://www.notion.so/29114d1a96d180919cc5de1832f18d38"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        512,
+        736
+      ],
+      "id": "a84fc1be-772e-4893-a213-09b7d95a129e",
+      "name": "Get many database pages",
+      "credentials": {
+        "notionApi": {
+          "id": "4zE9OwCAyBLgBqGS",
+          "name": "Notion Audio Notes"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => ({\n  name: item.json.name,\n  note: item.json.property_note,\n  level: item.json.property_level[0]\n})).sort((a, b) => {\n  const levelOrder = { 'Alto': 1, 'Medio': 2, 'Bajo': 3 };\n  return levelOrder[a.level] - levelOrder[b.level];\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        736
+      ],
+      "id": "0148443b-83e9-4050-be85-7f081a9c0383",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('When Executed by Another Workflow').item.json.chat_id }}",
+        "text": "={{ $json.data.map(item => `🔹 *${item.name}*\\n📝 ${item.note}\\n⚡ Nivel: ${item.level}`).join('\\n\\n') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1248,
+        736
+      ],
+      "id": "8433ae7f-698b-472a-84ce-f91faebc5a85",
+      "name": "Send a text message1",
+      "webhookId": "7045b756-bb3c-4432-b6fb-e5e027a87c87",
+      "executeOnce": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "7hfxjDRCjP7INCH5",
+          "name": "Telegram @audio_notes_n8n_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        736
+      ],
+      "id": "b00ba8a9-5776-4372-bd5a-d809a8ab5e28",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "description": "Si capturas un nivel de urgencia en la petición del usuario entonces debes aplicar esta tool para recupere los datos por el nivel de urgencia Alto, Medio o Bajo",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $workflow.id }}",
+          "cachedResultName": "={{ $workflow.id }}"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "level": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('level', `Level de urgencia y relevancia de la petición de usuario. Valores posibles: Alto, Medio, Bajo`, 'string') }}",
+            "tool": "retrieve_by_level_database",
+            "chat_id": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+            "query": "={{ $json.text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "tool",
+              "displayName": "tool",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "level",
+              "displayName": "level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1408,
+        224
+      ],
+      "id": "ac1dd317-e5a7-4f0e-82a4-b7dcd3417e00",
+      "name": "retrieve_by_level_database"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "29114d1a-96d1-8091-9cc5-de1832f18d38",
+          "mode": "list",
+          "cachedResultName": "Audio Notes",
+          "cachedResultUrl": "https://www.notion.so/29114d1a96d180919cc5de1832f18d38"
+        },
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Level|multi_select",
+              "condition": "contains",
+              "multiSelectValue": "={{ $json.level }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        512,
+        944
+      ],
+      "id": "d3f4d7de-b373-423a-8393-9c0efc7551d6",
+      "name": "Get many database pages (filtered)",
+      "credentials": {
+        "notionApi": {
+          "id": "4zE9OwCAyBLgBqGS",
+          "name": "Notion Audio Notes"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Get many database pages": [
+      {
+        "json": {
+          "id": "29214d1a-96d1-8135-b406-ee85585b0870",
+          "name": "N/A",
+          "url": "https://www.notion.so/N-A-29214d1a96d18135b406ee85585b0870",
+          "property_note": "N/A",
+          "property_level": [
+            "Bajo"
+          ],
+          "property_created_time": "2025-10-20T07:56:00.000Z",
+          "property_title": "N/A"
+        }
+      },
+      {
+        "json": {
+          "id": "29214d1a-96d1-8164-aa71-ec7e83478492",
+          "name": "Recuerda ir por el mazo",
+          "url": "https://www.notion.so/Recuerda-ir-por-el-mazo-29214d1a96d18164aa71ec7e83478492",
+          "property_note": "Recuerda que tienes que ir a por el mazo",
+          "property_level": [
+            "Alto"
+          ],
+          "property_created_time": "2025-10-20T08:23:00.000Z",
+          "property_title": "Recuerda ir por el mazo"
+        }
+      }
+    ],
+    "Code in JavaScript": [
+      {
+        "json": {
+          "name": "Recuerda ir por el mazo",
+          "note": "Recuerda que tienes que ir a por el mazo",
+          "level": "Alto"
+        }
+      },
+      {
+        "json": {
+          "name": "N/A",
+          "note": "N/A",
+          "level": "Bajo"
+        }
+      }
+    ],
+    "Telegram Trigger": [
+      {
+        "json": {
+          "update_id": 280824428,
+          "message": {
+            "message_id": 10,
+            "from": {
+              "id": 14977870,
+              "is_bot": false,
+              "first_name": "Daniel",
+              "last_name": "Primo",
+              "username": "danielprimo",
+              "language_code": "es"
+            },
+            "chat": {
+              "id": 14977870,
+              "first_name": "Daniel",
+              "last_name": "Primo",
+              "username": "danielprimo",
+              "type": "private"
+            },
+            "date": 1760954789,
+            "text": "Quiero ir al notario el lunes"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "insert_database": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent Insert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get many database pages",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get many database pages (filtered)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent Insert",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent Insert",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent Insert": {
+      "main": [
+        [
+          {
+            "node": "Create a database page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "retrieve_database": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a database page": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many database pages": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message1": {
+      "main": [
+        []
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "retrieve_by_level_database": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many database pages (filtered)": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "679280da-c0b4-41fd-a932-fe32a6b5fe79",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f28ec27b08f1f4c023867f34ce4f530a2ceccedef2f74c2ab9582dd9a30c87d0"
+  },
+  "id": "fIfis0fJdXhpoY0T",
+  "tags": []
+}

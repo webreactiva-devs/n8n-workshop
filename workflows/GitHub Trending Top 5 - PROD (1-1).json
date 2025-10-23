@@ -1,0 +1,268 @@
+{
+  "name": "GitHub Trending Top 5 - PROD (1-1)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "fe5103ce-b51d-4d0b-80bb-bb0eca9a56de",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        240,
+        304
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "01df788f-edb4-4bd2-a004-a050af40a955",
+      "name": "Schedule - Daily 8 AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        240,
+        496
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "url": "https://github.com/trending",
+        "options": {}
+      },
+      "id": "f808da76-2558-44c8-a4da-9b2bbfaac5b7",
+      "name": "Scrape GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        464,
+        400
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "jsCode": "const html = $input.first().json.data;\n\nconst repoPattern = /<article[^>]*class=\"Box-row\"[^>]*>([\\s\\S]*?)<\\/article>/gi;\nconst repos = [];\nlet match;\n\nwhile ((match = repoPattern.exec(html)) !== null) {\n  const repoHtml = match[1];\n  const nameMatch = /<h2[^>]*class=\"h3[^>]*>([\\s\\S]*?)<\\/h2>/i.exec(repoHtml);\n  const linkMatch = /<a[^>]*href=\"([^\"]+)\"[^>]*>([\\s\\S]*?)<\\/a>/i.exec(nameMatch ? nameMatch[1] : '');\n  const descMatch = /<p[^>]*class=\"[^\"]*col-9[^\"]*\"[^>]*>([\\s\\S]*?)<\\/p>/i.exec(repoHtml);\n  const langMatch = /<span[^>]*itemprop=\"programmingLanguage\"[^>]*>([^<]+)<\\/span>/i.exec(repoHtml);\n  const starsMatch = /<span[^>]*class=\"[^\"]*float-sm-right[^\"]*\"[^>]*>([\\s\\S]*?)<\\/span>/i.exec(repoHtml);\n  \n  if (linkMatch) {\n    repos.push({\n      repo_name: linkMatch[2].replace(/<[^>]+>/g, '').trim().replace(/\\s+/g, ' '),\n      repo_url: linkMatch[1],\n      description: descMatch ? descMatch[1].replace(/<[^>]+>/g, '').trim().replace(/\\s+/g, ' ') : '',\n      language: langMatch ? langMatch[1].trim() : '',\n      stars_today: starsMatch ? starsMatch[1].replace(/<[^>]+>/g, '').trim() : ''\n    });\n  }\n}\n\nreturn repos.map(repo => ({ json: repo }));"
+      },
+      "id": "679ac996-873c-4ce4-b6ca-536fdfe7e99b",
+      "name": "Extract All Repos",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        688,
+        400
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "id": "0dc81a45-48a8-4609-b431-d4200cec40a3",
+      "name": "Groq Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "position": [
+        1216,
+        624
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "groqApi": {
+          "id": "dhrZoBBZw3mymyL2",
+          "name": "Groq account 1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "your-email@example.com",
+        "toEmail": "recipient@example.com",
+        "subject": "=Github Trending {{ new Date().toLocaleDateString('es-ES') }}",
+        "emailFormat": "=text",
+        "text": "={{ $json.output.join(\"\\n\\n\") }}",
+        "options": {}
+      },
+      "id": "9ba441ad-829c-4132-820e-721f6b4e2e21",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "position": [
+        1712,
+        400
+      ],
+      "typeVersion": 2.1,
+      "webhookId": "db43afb7-194d-4116-b754-a416dd873896",
+      "credentials": {
+        "smtp": {
+          "id": "OVqgCwDB1WrDr8uH",
+          "name": "Test Mailtrap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "output"
+            }
+          ]
+        },
+        "options": {
+          "disableDotNotation": true
+        }
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1488,
+        400
+      ],
+      "id": "96bc11e0-b9d7-4dfa-8197-721357eb6669",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "maxItems": 10
+      },
+      "id": "892b81b2-b523-461b-956a-823378fe7368",
+      "name": "Limit to Top 10",
+      "type": "n8n-nodes-base.limit",
+      "position": [
+        912,
+        400
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analiza las siguiente librería trending de GitHub y crea un email en texto plano.\n\nNo saludes, no presentes, no te despidas. Solo queremos el comentario de cada repositorio. \n\nDatos del depositorio\nName: {{ $json.repo_name }}\nUrl: {{ $json.repo_url }}\nDescription: {{ $json.description }}\nLanguage: {{ $json.language }}\nStars today: {{ $json.stars_today }}\n\nFormato requerido Texto plano en español con:\n\n👉👉 Nombre del repositorio\n- URL: (https://github.com + repo_url)\n- Lenguaje: [Lenguaje de programación]\n- Stars hoy: [Stars today]\n\n[Descripción en español de qué hace y por qué es interesante]\n\n\n\n\nIMPORTANTE: \n- TODO en español\n- NO uses HTML, solo texto plano\n- Incluye la URL completa de cada repositorio\n\nNo uses formulas para introducir los resultados del tipo: \"Se han identificado librerías trending en GitHub que destacan por sus innovadoras funcionalidades y gran aceptación en la comunidad de desarrolladores\" \nNo uses \"Este repositorio\" o \"Este proyecto\" para iniciar la descripcion\n\nUtiliza un tono pícaro en tu respuesta\n\nOutput como texto plano.",
+        "options": {
+          "systemMessage": "Eres un analista técnico que escribe emails claros en español, siempre en texto plano.Siempre devuelves texto plano."
+        }
+      },
+      "id": "e2e2817a-5ebb-4396-85b5-b9473387b914",
+      "name": "Generate Text",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1136,
+        400
+      ],
+      "typeVersion": 1.7
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Scrape GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Model": {
+      "main": [],
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Text",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "main": []
+    },
+    "Scrape GitHub": {
+      "main": [
+        [
+          {
+            "node": "Extract All Repos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract All Repos": {
+      "main": [
+        [
+          {
+            "node": "Limit to Top 10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule - Daily 8 AM": {
+      "main": [
+        [
+          {
+            "node": "Scrape GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit to Top 10": {
+      "main": [
+        [
+          {
+            "node": "Generate Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Text": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionOrder": "v0",
+    "availableInMCP": false,
+    "timeSavedPerExecution": 5,
+    "errorWorkflow": "O6kjjx2crRp0nhuA"
+  },
+  "versionId": "268e4e9e-3ec5-4565-943a-4c418b1eb31e",
+  "meta": {
+    "instanceId": "f28ec27b08f1f4c023867f34ce4f530a2ceccedef2f74c2ab9582dd9a30c87d0"
+  },
+  "id": "OaGHFE8VBvtZpquR",
+  "tags": []
+}
